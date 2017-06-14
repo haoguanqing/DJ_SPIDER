@@ -11,6 +11,8 @@ socket.setdefaulttimeout(10)
 HTML_PARSER = 'html.parser'
 LXML_PARSER = 'lxml'
 
+STANDARD_HEADERS = {'User-Agent': 'Mozilla/5.0 (X11; Linux i686) Chrome/58.0.3029.110 Safari/10.1.1'}
+
 
 def martingarrix():
     name = 'Martin Garrix'
@@ -54,11 +56,31 @@ def dimitrivegasandlikemike():
     report(name)
 
 
+def hardwell():
+    name = 'HARDWELL'
+    image_url = []
+    url = 'https://www.djhardwell.com/'
+
+    soup = Soup(req.urlopen(req.Request(url, None, STANDARD_HEADERS)).read(), HTML_PARSER)
+
+    events_list = soup.find_all('div', {'class': 'item-inner'})
+    for event in events_list:
+        if event.header.h2.a is not None:
+            if str(event.header.h2.a['href']).startswith('/tourdates/'):
+                venue = event.header.h2.a.string
+                location = str(event.p.contents[0].string) + ', ' + str(event.p.contents[2].string)
+                date = event.header.h3.string
+                url = event.find_all('a')[1]['href']
+                if str(url) == '/login':
+                    url = None
+
+    report(name)
+
+
 def dondiablo():
     name = 'Don Diablo'
     url = 'https://www.dondiablo.com/'
-    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux i686) Chrome/58.0.3029.110 Safari/10.1.1'}
-    soup = Soup(req.urlopen(req.Request(url, None, headers)).read(), HTML_PARSER)
+    soup = Soup(req.urlopen(req.Request(url, None, STANDARD_HEADERS)).read(), HTML_PARSER)
 
     image_urls = [soup.find('img', {'class': 'load-false', 'name': '', 'data-type': 'image'})["data-image"]]
 
@@ -71,9 +93,10 @@ def report(task):
 
 
 def main():
-    dondiablo()
     martingarrix()
     dimitrivegasandlikemike()
+    hardwell()
+    dondiablo()
 
 
 class Data(object):
